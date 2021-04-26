@@ -50,8 +50,7 @@ end
 function Player:update(dt)
     self:move(dt)
     self:weaponAction(dt)
-    self:moveBullets(dt)
-    --self:actions:fire(dt)
+    self:updateBullets(dt)
     self:checkBoundaries()
 end
 
@@ -112,7 +111,7 @@ function Player:weaponAction(dt)
 end
 
 -- This moves any active bullets across the screen
-function Player:moveBullets(dt)
+function Player:updateBullets(dt)
     for i, bullet in ipairs(self.bullets) do
         bullet.y = bullet.y - (250 * dt)
     
