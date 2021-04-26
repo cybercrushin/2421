@@ -34,7 +34,7 @@ function Player:load()
     self.selected_weapon = 'default'
     self.weapons = {}
     self.weapons['default'] = {}
-    self.weapons['default']['imag'] = love.graphics.newImage('Assets/Player/default_bullet.png')
+    self.weapons['default']['image'] = love.graphics.newImage('Assets/Player/default_bullet.png')
     self.weapons['default']['cooldown_max'], self.weapons['default']['cooldown_timer'] = 0.2
      
     -- Player Actions
@@ -107,7 +107,7 @@ function Player:fireBullet(dt)
         -- Create some bullets
         --weapon = self.weapons[self.selected_weapon]
         weapon = self.weapons['default']
-        newBullet = { x = self.x + (self.playerImg:getWidth()/2), y = self.y - 10, img = weapon['img'] }
+        newBullet = { x = self.x + (self.playerImg:getWidth()/2), y = self.y - 10, img = weapon['image'] }
         table.insert(self.bullets, newBullet)
         self.can_fire = true
         end
