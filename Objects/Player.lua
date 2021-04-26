@@ -24,7 +24,6 @@ function Player:load()
 
     -- Booleans
     self.can_fire = true
-    
     self.is_firing = false
     self.taking_damage = false
     self.is_dodging = false
@@ -35,8 +34,9 @@ function Player:load()
     self.weapons = {}
     self.weapons['default'] = {}
     self.weapons['default']['image'] = love.graphics.newImage('Assets/Player/default_bullet.png')
-    self.weapons['default']['cooldown_max'], self.weapons['default']['cooldown_timer'] = 0.2
-     
+    self.weapons['default']['cooldown_total_time'] = .25
+    self.weapons['default']['cooldown_val'] = self.weapons['default']['cooldown_total_time'] 
+
     -- Player Actions
     self.actions = {}
     self.actions['fire'] = function(dt)
@@ -45,19 +45,11 @@ function Player:load()
     
     -- Player Bullet Objects
     self.bullets = {}
-    -- self.actions = {
-    --     'move' = function()
-    --         self.move(dt)
-    --     end
-    --     'fire' = function()
-    --         self.fireBullet(dt)
-    --     end
-    -- }
 end
 
 function Player:update(dt)
     self:move(dt)
-    self:fireBullet(dt)
+    self:weaponAction(dt)
     self:moveBullets(dt)
     --self:actions:fire(dt)
     self:checkBoundaries()
@@ -96,33 +88,39 @@ function Player:action(dt, action_name)
 
 end
 
-function Player:fireBullet(dt)
-    
-    if love.keyboard.isDown('space', 'rctrl', 'lctrl') and self.can_fire then
-        --canShootTimer = canShootTimer - (1 * dt)
-        --if canShootTimer < 0 then
-        --    canShoot = true
-        --end
-        
-        -- Create some bullets
-        --weapon = self.weapons[self.selected_weapon]
-        weapon = self.weapons['default']
-        newBullet = { x = self.x + (self.playerImg:getWidth()/2), y = self.y - 10, img = weapon['image'] }
-        table.insert(self.bullets, newBullet)
+-- Class method handles the actions on the players selected weapon
+function Player:weaponAction(dt)
+    selected = self.selected_weapon
+    -- check selected weapon cool down period
+    self.weapons[selected]['cooldown_val'] = dt + self.weapons[selected]['cooldown_val']
+
+    -- if enough time has passed from the last shot, allow the next shot to occur
+    if self.weapons[selected]['cooldown_val'] >= self.weapons[selected]['cooldown_total_time'] then
+        self.weapons[selected]['cooldown_val'] = self.weapons[selected]['cooldown_total_time']
         self.can_fire = true
-        end
+    else
+        self.can_fire = false
+    end
+
+    -- if the user has hit an input to fire a weapon and cooldown has occured, add the bullet object to game
+    if love.keyboard.isDown('space', 'rctrl', 'lctrl') and self.can_fire then    
+        newBullet = { x = self.x + (self.playerImg:getWidth()/2), y = self.y - 10, img = self.weapons[selected]['image'] }
+        table.insert(self.bullets, newBullet)
+        self.weapons[selected]['cooldown_val'] = 0
+    end
 
 end
 
--- 
+-- This moves any active bullets across the screen
 function Player:moveBullets(dt)
     for i, bullet in ipairs(self.bullets) do
         bullet.y = bullet.y - (250 * dt)
     
-          if bullet.y < 0 then -- remove bullets when they pass off the screen
+          if bullet.y < 0 then -- remove bullets when the   y pass off the screen
             table.remove(self.bullets, i)
         end
     end
+    
 end
 
 -- Checks to make sure the player is within the allowed boundaries of the game
@@ -159,3 +157,4 @@ function Player:drawBullets()
         love.graphics.draw(bullet.img, bullet.x, bullet.y)
     end
 end
+ 
