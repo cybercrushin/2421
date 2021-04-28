@@ -12,9 +12,9 @@ end
 DefaultBullet = Bullet:extend()
 
 function DefaultBullet:new(x, y)
-    self.x = x
-    self.y = y
     self.img = love.graphics.newImage('Assets/Player/default_bullet.png')
+    self.x = x - self.img:getWidth() / 2
+    self.y = y
     self.width = self.img:getHeight()
     self.height = self.img:getWidth()
     self.dmg = 500
