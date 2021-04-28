@@ -28,12 +28,12 @@ function Player:load()
     self.taking_damage = false
     self.is_dodging = false
     self.can_accept_input = true
-
+    
     -- Weapons
     self.selected_weapon = 'default'
     self.weapons = {}
     self.weapons['default'] = {}
-    self.weapons['default']['image'] = love.graphics.newImage('Assets/Player/default_bullet.png')
+    self.weapons['default']['bullet'] = DefaultBullet
     self.weapons['default']['cooldown_total_time'] = .25
     self.weapons['default']['cooldown_val'] = self.weapons['default']['cooldown_total_time'] 
 
@@ -103,7 +103,8 @@ function Player:weaponAction(dt)
 
     -- if the user has hit an input to fire a weapon and cooldown has occured, add the bullet object to game
     if love.keyboard.isDown('space', 'rctrl', 'lctrl') and self.can_fire then    
-        newBullet = { x = self.x + (self.playerImg:getWidth()/2), y = self.y - 10, img = self.weapons[selected]['image'] }
+        -- newBullet = { x = self.x + (self.playerImg:getWidth()/2), y = self.y - 10, img = self.weapons[selected]['image'], width= self.weapons[selected]['image']:getWidth(), height = self.weapons[selected]['image']:getHeight(), dmg = 300 }
+        newBullet = self.weapons[selected]['bullet'](self.x + (self.playerImg:getWidth()/2), self.y - 10)
         table.insert(self.bullets, newBullet)
         self.weapons[selected]['cooldown_val'] = 0
     end
