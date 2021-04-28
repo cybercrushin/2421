@@ -62,13 +62,38 @@ function Player:move(dt)
         else 
             calculated_speed = self.speed * dt
         end
-
-        if love.keyboard.isDown("w", "up") then
+        local skip_up = false
+        local skip_down = false
+        -- move up / diagonally
+        if love.keyboard.isDown("w", "up") and love.keyboard.isDown("a", "left") then
+            self.y = self.y - calculated_speed
+            self.x = self.x - calculated_speed
+            self.direction = "up_left"
+            skip_up = true
+        elseif love.keyboard.isDown("w", "up") and love.keyboard.isDown("d", "right") then
+            self.y = self.y - calculated_speed
+            self.x = self.x + calculated_speed
+            self.direction = "up_right"
+            skip_up = true
+        elseif love.keyboard.isDown("w", "up") and not skip_up then
             self.y = self.y - calculated_speed
             self.direction = "up"
+        -- move down / diagonally
+        elseif love.keyboard.isDown("s", "down") and love.keyboard.isDown("a", "left") then
+            self.y = self.y + calculated_speed
+            self.x = self.x - calculated_speed
+            self.direction = "down_left"
+            skip_down = true
+        elseif love.keyboard.isDown("s", "down") and love.keyboard.isDown("d", "right") then
+            self.y = self.y + calculated_speed
+            self.x = self.x + calculated_speed
+            self.direction = "down_right"
+            skip_down = true
         elseif love.keyboard.isDown("s", "down") then
             self.y = self.y + calculated_speed
             self.direction = "down"
+
+        -- move left or right
         elseif love.keyboard.isDown("a", "left") then
             self.x = self.x - calculated_speed
             self.direction = "left"
