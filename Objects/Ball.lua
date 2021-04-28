@@ -5,24 +5,47 @@ function Ball:load()
     self.width = 20
     self.height = 20
     self.speed = 300
-    self.xVel = -self.speed
+    --self.xVel = -self.speed
+    self.xVel = 0
     self.yVel = 0
     self.radius = 20
     self.x = love.graphics.getWidth() / 2 
     self.y = love.graphics.getHeight() / 2 
-    
+    self.hp = 1200
+    self.hit_sprites = {}
     
 end
 
 function Ball:update(dt)
+    self:isHit(dt)
     self:move(dt)
     self:collide()
+    self:updateHitSprites(dt)
     self:checkBoundaries()
 end
 
 function Ball:move(dt)
     self.x = self.x + self.xVel * dt
     self.y = self.y + self.yVel * dt
+end
+
+function Ball:isHit(dt)
+    for i, bullet in ipairs(Player.bullets) do
+        if checkCollision(bullet, self) then
+            table.remove(Player.bullets, i)
+            self.hp = self.hp - bullet.dmg
+            exp =  LoveAnimation.new('Sprites/default_hit.lua')
+            table.insert(self.hit_sprites, exp)
+        end
+    end
+
+end
+
+function Ball:updateHitSprites(dt)
+    for i, exp in ipairs(self.hit_sprites) do
+        exp:update(dt)
+    end
+    
 end
 
 function Ball:collide()
@@ -46,8 +69,6 @@ function Ball:collide()
     elseif self.x + self.width >= love.graphics.getWidth() then
         self.xVel = -self.xVel
     end
-    
-
 end
 
 
@@ -71,5 +92,15 @@ end
 
 function Ball:draw()
     love.graphics.circle("fill", self.x, self.y, self.radius)
+    self:drawHits()
     --love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+end
+
+function Ball:drawHits()
+    for i, exp in ipairs(self.hit_sprites) do
+        print('here')
+        --love.graphics.draw(bullet.img, bullet.x, bullet.y)
+        exp:setPosition(self.x, self.y)
+        exp:draw()
+    end
 end
