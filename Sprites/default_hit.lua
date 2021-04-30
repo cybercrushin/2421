@@ -69,7 +69,7 @@ return {
 			frameW = 32,
 			frameH = 32,
 			nextState = "hit", -- we loop the running state
-			switchDelay = 0.14
+			switchDelay = 0.07
 		}
 	}
 }
