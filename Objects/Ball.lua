@@ -59,17 +59,17 @@ function Ball:collide()
         local collisionPosition = middleBall - middlePlayer
         self.yVel = collisionPosition * 5
     end
-    if self.y <= 0 then
+    if self.y < 0 then
         -- self.y = 0
         self.yVel = -self.yVel
-    elseif self.y + self.height >= love.graphics.getHeight() then
+    elseif self.y + self.height > love.graphics.getHeight() then
         --self.y = love.graphics.getHeight() - self.height
         self.yVel = -self.yVel
     end
     -- if ball hits left or right bounce back
-    if self.x <= 0 then
+    if self.x < 0 then
         self.xVel = -self.xVel
-    elseif self.x + self.width >= love.graphics.getWidth() then
+    elseif self.x + self.width > love.graphics.getWidth() then
         self.xVel = -self.xVel
     end
 end
