@@ -2,8 +2,8 @@ Player = {}
 
 function Player:load()
     -- Size Params
-    self.width = 100
-    self.height = 100
+    self.width = 87
+    self.height = 80
     self.weight = 100
 
     -- Speed / Movement Params
@@ -11,13 +11,17 @@ function Player:load()
     self.speed_modifier = 1.5
 
     -- Position Params
-    self.x = 50
-    self.y = love.graphics.getHeight() / 2 - self.height / 2
+    self.x = love.graphics.getWidth() / 2 - (self.width / 2)
+    self.y = love.graphics.getHeight() - self.height - 10
     self.direction = "up"
 
     -- Assets
-    self.playerImg = love.graphics.newImage('Assets/Player/plane.png')
-
+    -- self.neutralImage = love.graphics.newImage('Assets/Player/ship0.png')
+    -- self.leftImage = love.graphics.newImage('Assets/Player/ship-1.png')
+    -- self.rightImage = love.graphics.newImage('Assets/Player/ship1.png')
+    -- self.playerImg = self.neutralImage
+    self.sprite = LoveAnimation.new('Sprites/player_ship.lua')
+    self.sprite_max_directional_frames = 4
     -- Actions
     self.ifames = 5
 
@@ -49,9 +53,21 @@ end
 
 function Player:update(dt)
     self:move(dt)
+    self.sprite:update(dt)
     self:weaponAction(dt)
     self:updateBullets(dt)
     self:checkBoundaries()
+end
+
+function Player:changeDirection(direction)
+    local currentState = self.sprite:getCurrentState()
+    if currentState ~= direction then
+        self.sprite:unpause()
+        self.sprite:setState(direction)
+    elseif currentState == direction and self.sprite.currentFrame == self.sprite_max_directional_frames then
+        self.sprite:pause()
+    end
+
 end
 
 -- Handles player movement 
@@ -69,25 +85,33 @@ function Player:move(dt)
             self.y = self.y - calculated_speed
             self.x = self.x - calculated_speed
             self.direction = "up_left"
+            -- self.playerImg = self.leftImage
+            self:changeDirection('left')
             skip_up = true
         elseif love.keyboard.isDown("w", "up") and love.keyboard.isDown("d", "right") then
             self.y = self.y - calculated_speed
             self.x = self.x + calculated_speed
             self.direction = "up_right"
+            -- self.playerImg = self.rightImage
+            self:changeDirection('right')
             skip_up = true
         elseif love.keyboard.isDown("w", "up") and not skip_up then
             self.y = self.y - calculated_speed
             self.direction = "up"
-        -- move down / diagonally
+            -- move down / diagonally
         elseif love.keyboard.isDown("s", "down") and love.keyboard.isDown("a", "left") then
             self.y = self.y + calculated_speed
             self.x = self.x - calculated_speed
             self.direction = "down_left"
+            -- self.playerImg = self.leftImage
+            self:changeDirection('left')
             skip_down = true
         elseif love.keyboard.isDown("s", "down") and love.keyboard.isDown("d", "right") then
             self.y = self.y + calculated_speed
             self.x = self.x + calculated_speed
             self.direction = "down_right"
+            self:changeDirection('right')
+            -- self.playerImg = self.rightImage
             skip_down = true
         elseif love.keyboard.isDown("s", "down") then
             self.y = self.y + calculated_speed
@@ -97,9 +121,15 @@ function Player:move(dt)
         elseif love.keyboard.isDown("a", "left") then
             self.x = self.x - calculated_speed
             self.direction = "left"
+            self:changeDirection('left')
+            -- self.playerImg = self.leftImage
         elseif love.keyboard.isDown("d", "right") then
             self.x = self.x + calculated_speed
             self.diection = "right"
+            self:changeDirection('right')
+            --self.playerImg = self.rightImage
+        else
+            self.sprite:setState('neutral')
         end
     end
 end
@@ -128,8 +158,7 @@ function Player:weaponAction(dt)
 
     -- if the user has hit an input to fire a weapon and cooldown has occured, add the bullet object to game
     if love.keyboard.isDown('space', 'rctrl', 'lctrl') and self.can_fire then    
-        -- newBullet = { x = self.x + (self.playerImg:getWidth()/2), y = self.y - 10, img = self.weapons[selected]['image'], width= self.weapons[selected]['image']:getWidth(), height = self.weapons[selected]['image']:getHeight(), dmg = 300 }
-        newBullet = self.weapons[selected]['bullet'](self.x + (self.playerImg:getWidth()/2), self.y - 10)
+        newBullet = self.weapons[selected]['bullet'](self.x + self.width / 2, self.y - 10)
         table.insert(self.bullets, newBullet)
         self.weapons[selected]['cooldown_val'] = 0
     end
@@ -141,7 +170,7 @@ function Player:updateBullets(dt)
     for i, bullet in ipairs(self.bullets) do
         bullet.y = bullet.y - (250 * dt)
     
-          if bullet.y < 0 then -- remove bullets when the   y pass off the screen
+        if bullet.y < 0 then -- remove bullets when the   y pass off the screen
             table.remove(self.bullets, i)
         end
     end
@@ -154,14 +183,14 @@ function Player:checkBoundaries(dt)
     screen_width = love.graphics.getWidth()
     if self.y <= 0 then
         self.y = 0
-    elseif self.y + self.height >= screen_height then
-        self.y = screen_height - self.height
+    elseif self.y + self.height > screen_height then
+        self.y = screen_height - self.height - 1
     end
 
-    if self.x <= 0 then
+    if self.x < 0 then
         self.x = 0
-    elseif self.x + self.width >= screen_width  then
-        self.x = screen_width - self.height
+    elseif self.x + self.width > screen_width then
+        self.x = screen_width - self.width - 1
     end
 end
 
@@ -173,7 +202,8 @@ end
 
 -- Draw the player sprite
 function Player:drawPlayer()
-    love.graphics.draw(self.playerImg, self.x, self.y)
+    self.sprite:setPosition(self.x, self.y)
+    self.sprite:draw()
 end
 
 -- Draw the characters bullets if any
