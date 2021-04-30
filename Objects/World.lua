@@ -15,7 +15,7 @@ function World:load()
     self.bg_imgs[2]['image'] = bg_img
     self.bg_imgs[2]['y'] = self.bg_imgs[1]['y'] - self.bg_imgs[1]['image']:getHeight()
     self.bg_imgs[2]['x'] = 0
-    self.reset_y = 0 - self.bg_imgs[1]['y'] - self.bg_imgs[1]['image']:getHeight()
+    self.reset_y = self.bg_imgs[1]['y'] - self.bg_imgs[1]['image']:getHeight()
 
 end
 
